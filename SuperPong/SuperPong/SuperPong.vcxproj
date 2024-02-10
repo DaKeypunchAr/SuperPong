@@ -12,7 +12,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Shader\Shader.cpp" />
     <ClCompile Include="STB\image.cpp" />
+    <ClCompile Include="TextAtlas\TextAtlas.cpp" />
+    <ClCompile Include="Texture\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\ball\fragment.glsl" />
@@ -27,7 +30,10 @@
     <None Include="shaders\text\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Shader\Shader.hpp" />
     <ClInclude Include="STB\image.h" />
+    <ClInclude Include="TextAtlas\TextAtlas.hpp" />
+    <ClInclude Include="Texture\Texture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Blockletter.otf" />
@@ -48,6 +54,7 @@
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SuperPong</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -95,6 +102,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
