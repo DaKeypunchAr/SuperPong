@@ -15,7 +15,7 @@ namespace OGL
 		public:
 			Shader(const std::string& folderPath);
 			Shader(const std::string& vsFilePath, const std::string& fsFilePath);
-			Shader() = delete;
+			Shader();
 			Shader(const Shader& shader) = delete;
 			~Shader();
 
@@ -31,8 +31,10 @@ namespace OGL
 
 			void operator=(const Shader & shader) = delete;
 
+			void initialize(const std::string& folderPath);
+			void initialize(const std::string& vsFilePath, const std::string& fsFilePath);
+
 		private:
-			void initialize(const std::string& vsFilePath, const std::string& fsFilePath) const;
 			std::string readFile(const std::string& fileLoc) const;
 			bool compileShader(unsigned int shaderId) const;
 			bool linkProgram() const;

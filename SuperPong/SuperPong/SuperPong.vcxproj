@@ -16,24 +16,21 @@
     <ClCompile Include="STB\image.cpp" />
     <ClCompile Include="TextAtlas\TextAtlas.cpp" />
     <ClCompile Include="Texture\Texture.cpp" />
+    <ClCompile Include="VAO\VAO.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\ball\fragment.glsl" />
-    <None Include="shaders\ball\vertex.glsl" />
-    <None Include="shaders\paddle\fragment.glsl" />
-    <None Include="shaders\paddle\vertex.glsl" />
-    <None Include="shaders\separation\fragment.glsl" />
-    <None Include="shaders\separation\vertex.glsl" />
+    <None Include="shaders\solid\fragment.glsl" />
+    <None Include="shaders\solid\vertex.glsl" />
     <None Include="shaders\texture\fragment.glsl" />
     <None Include="shaders\texture\vertex.glsl" />
-    <None Include="shaders\text\fragment.glsl" />
-    <None Include="shaders\text\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Game.hpp" />
     <ClInclude Include="Shader\Shader.hpp" />
     <ClInclude Include="STB\image.h" />
     <ClInclude Include="TextAtlas\TextAtlas.hpp" />
     <ClInclude Include="Texture\Texture.hpp" />
+    <ClInclude Include="VAO\VAO.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Blockletter.otf" />

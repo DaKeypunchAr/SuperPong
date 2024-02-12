@@ -3,9 +3,14 @@
 namespace OGL
 {
 	Shader::Shader(const std::string& folderPath)
-		: m_ProgramId(glCreateProgram()) { initialize(folderPath + "/vertex.glsl", folderPath + "/fragment.glsl"); }
+	{
+		initialize(folderPath + "/vertex.glsl", folderPath + "/fragment.glsl");
+	}
 	Shader::Shader(const std::string& vsFilePath, const std::string& fsFilePath)
-		: m_ProgramId(glCreateProgram()) { initialize(vsFilePath, fsFilePath); }
+	{
+		initialize(vsFilePath, fsFilePath);
+	}
+	Shader::Shader() {}
 	Shader::~Shader()
 	{
 		glDeleteProgram(m_ProgramId);
@@ -47,8 +52,13 @@ namespace OGL
 		glUniform4f(getUniformLocation(uniformName), f4.x, f4.y, f4.z, f4.w);
 	}
 
-	void Shader::initialize(const std::string& vsFilePath, const std::string& fsFilePath) const
+	void Shader::initialize(const std::string& folderPath)
 	{
+		initialize(folderPath + "/vertex.glsl", folderPath + "/fragment.glsl");
+	}
+	void Shader::initialize(const std::string& vsFilePath, const std::string& fsFilePath)
+	{
+		m_ProgramId = glCreateProgram();
 		unsigned int vs = glCreateShader(GL_VERTEX_SHADER), fs = glCreateShader(GL_FRAGMENT_SHADER);
 
 		std::string vsSource = readFile(vsFilePath), fsSource = readFile(fsFilePath);

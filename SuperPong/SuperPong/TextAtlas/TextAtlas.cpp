@@ -52,8 +52,8 @@ namespace SPong
 		uvTR = uvBL + glm::vec2(dimension.x / (float)atlasDimension.x, dimension.y / (float)atlasDimension.y);
 	}
 
-	TextAtlas::TextAtlas(std::string atlasDetails, OGL::TextureFilter filter, AtlasDetailFormat format)
-		: m_Vao(), m_Vbo(), m_Ebo(), m_Texture(atlasDetails.substr(0, atlasDetails.find_first_of('\n')), 4, filter), m_Chars()
+	TextAtlas::TextAtlas(std::string atlasDetails, const SPong::GameData& game, AtlasDetailFormat format)
+		: m_VAO(16, 6, game.textureAttribList), m_Texture(atlasDetails.substr(0, atlasDetails.find_first_of('\n')), 4, game.textureFilters), m_Chars()
 	{
 		int xInAtlas = 0;
 		for (unsigned int i = 0; i < 95; i++)
@@ -66,61 +66,32 @@ namespace SPong
 			xInAtlas += m_Chars[i].dimension.x;
 		}
 
-		glCreateVertexArrays(1, &m_Vao);
-
-		unsigned int eb[6]
+		std::vector<unsigned int> eb
 		{
 			0, 1, 2, 1, 2, 3
 		};
-		glCreateBuffers(1, &m_Ebo);
-		glNamedBufferData(m_Ebo, sizeof(unsigned int) * 6, eb, GL_STATIC_DRAW);
-		glVertexArrayElementBuffer(m_Vao, m_Ebo);
-
-		void* buff = _alloca(sizeof(float) * 16);
-		glCreateBuffers(1, &m_Vbo);
-		glNamedBufferData(m_Vbo, sizeof(float) * 16, buff, GL_DYNAMIC_DRAW);
-		glVertexArrayVertexBuffer(m_Vao, 0, m_Vbo, 0, sizeof(float) * 4);
-		glVertexArrayAttribFormat(m_Vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribFormat(m_Vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2);
-		glVertexArrayAttribBinding(m_Vao, 0, 0);
-		glVertexArrayAttribBinding(m_Vao, 1, 0);
-		glEnableVertexArrayAttrib(m_Vao, 0);
-		glEnableVertexArrayAttrib(m_Vao, 1);
-	}
-	TextAtlas::~TextAtlas()
-	{
-		glDeleteVertexArrays(1, &m_Vao);
-		glDeleteBuffers(1, &m_Vbo);
-		glDeleteBuffers(1, &m_Ebo);
+		m_VAO.updateEB(eb, 0);
 	}
 	void TextAtlas::reinitBuffers()
 	{
-		unsigned int* eb = (unsigned int*) _alloca(m_CharacterCapacity * 6 * sizeof(unsigned int));
+		m_VAO.reCreateEB(m_CharacterCapacity * 6);
+		m_VAO.reCreateVB(m_CharacterCapacity * 16);
+
+		std::vector<unsigned int> eb;
+		eb.reserve(m_CharacterCapacity * 6);
+
 		for (unsigned int i = 0; i < m_CharacterCapacity; i++)
 		{
-			unsigned int i4 = i * 4, i6 = i * 6;
-			eb[i6] = i4;
-			eb[i6 + 1] = i4 + 1;
-			eb[i6 + 2] = i4 + 2;
-			eb[i6 + 3] = i4 + 1;
-			eb[i6 + 4] = i4 + 2;
-			eb[i6 + 5] = i4 + 3;
+			unsigned int i4 = i * 4;
+			eb.push_back(i4);
+			eb.push_back(i4 + 1);
+			eb.push_back(i4 + 2);
+			eb.push_back(i4 + 1);
+			eb.push_back(i4 + 2);
+			eb.push_back(i4 + 3);
 		}
-		glDeleteBuffers(1, &m_Ebo);
-		glCreateBuffers(1, &m_Ebo);
-		glNamedBufferData(m_Ebo, sizeof(unsigned int) * 6 * m_CharacterCapacity, eb, GL_STATIC_DRAW);
-		glVertexArrayElementBuffer(m_Vao, m_Ebo);
 
-		glDeleteBuffers(1, &m_Vbo);
-		glCreateBuffers(1, &m_Vbo);
-		glNamedBufferData(m_Vbo, sizeof(float) * 16 * m_CharacterCapacity, _alloca(sizeof(float) * 16 * m_CharacterCapacity), GL_STATIC_DRAW);
-		glVertexArrayVertexBuffer(m_Vao, 0, m_Vbo, 0, sizeof(float) * 4);
-		glVertexArrayAttribFormat(m_Vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-		glVertexArrayAttribFormat(m_Vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2);
-		glVertexArrayAttribBinding(m_Vao, 0, 0);
-		glVertexArrayAttribBinding(m_Vao, 1, 0);
-		glEnableVertexArrayAttrib(m_Vao, 0);
-		glEnableVertexArrayAttrib(m_Vao, 1);
+		m_VAO.updateEB(eb, 0);
 	}
 
 	void TextAtlas::renderText(const std::string& text, glm::vec2 pos, float scale, const OGL::Shader& shader)
@@ -132,11 +103,12 @@ namespace SPong
 		}
 
 		m_Texture.bind(2);
-		glBindVertexArray(m_Vao);
+		m_VAO.bind();
 		shader.use();
 		shader.uni1i("tex", 2);
 
-		float* vb = (float*)_alloca(sizeof(float) * text.length() * 16);
+		std::vector<float> vb;
+		vb.reserve(sizeof(float) * text.length() * 16);
 
 		for (unsigned int i = 0; i < text.length(); i++)
 		{
@@ -150,20 +122,20 @@ namespace SPong
 			glm::vec2 mappedTL = (tl - crntMin) * slope + trgtMin;
 			glm::vec2 mappedBR = (br - crntMin) * slope + trgtMin;
 
-			float b[16]{
+			std::vector<float> b{
 				mappedTL.x, mappedTL.y, info.uvBL.x, info.uvBL.y,
 				mappedBR.x, mappedTL.y, info.uvTR.x, info.uvBL.y,
 				mappedTL.x, mappedBR.y, info.uvBL.x, info.uvTR.y,
 				mappedBR.x, mappedBR.y, info.uvTR.x, info.uvTR.y
 			};
 
-			memcpy((vb + i * 16), b, sizeof(float) * 16);
+			vb.insert(vb.end(), b.begin(), b.end());
 
 			pos.x += info.advance.x * scale;
 			pos.y += info.advance.y * scale;
 		}
 
-		glNamedBufferSubData(m_Vbo, 0, sizeof(float) * text.length() * 16, vb);
+		m_VAO.updateVB(vb, 0);
 		glDrawElements(GL_TRIANGLES, text.length() * 6, GL_UNSIGNED_INT, nullptr);
 	}
 	float TextAtlas::getTextWidth(const std::string& text, float scale)

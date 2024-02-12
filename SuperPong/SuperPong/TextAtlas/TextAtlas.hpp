@@ -3,6 +3,8 @@
 
 #include "../Texture/Texture.hpp"
 #include "../Shader/Shader.hpp"
+#include "../VAO/VAO.hpp"
+#include "../Game.hpp"
 
 #include <array>
 
@@ -35,8 +37,8 @@ namespace SPong
 	class TextAtlas
 	{
 		public:
-			TextAtlas(std::string atlasDetails, OGL::TextureFilter filter, AtlasDetailFormat format = AtlasDetailFormat::DIMENSION_BEARING_ADVANCE);
-			~TextAtlas();
+			TextAtlas(std::string atlasDetails, const SPong::GameData& game, AtlasDetailFormat format = AtlasDetailFormat::DIMENSION_BEARING_ADVANCE);
+			~TextAtlas() = default;
 
 			void renderText(const std::string& text, glm::vec2 position, float scale, const OGL::Shader& shader);
 			float getTextWidth(const std::string& text, float scale);
@@ -45,7 +47,7 @@ namespace SPong
 			void reinitBuffers();
 
 		private:
-			unsigned int m_Vao, m_Vbo, m_Ebo;
+			OGL::VAO m_VAO;
 			OGL::Texture2D m_Texture;
 			std::array<CharRepresentationInfo, 95> m_Chars;
 			unsigned int m_CharacterCapacity = 1;
