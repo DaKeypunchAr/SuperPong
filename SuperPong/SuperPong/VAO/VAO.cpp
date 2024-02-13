@@ -22,14 +22,14 @@ namespace OGL
 	{
 		glCreateVertexArrays(1, &m_VAO);
 		glCreateBuffers(1, &m_EBO);
-		glNamedBufferData(m_EBO, eboCount * sizeof(float), _alloca(eboCount * sizeof(float)), GL_DYNAMIC_DRAW);
+		glNamedBufferData(m_EBO, eboCount * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
 		glVertexArrayElementBuffer(m_VAO, m_EBO);
 
 		for (unsigned int idx = 0; idx < vboCounts.size(); idx++)
 		{
 			unsigned int vbo;
 			glCreateBuffers(1, &vbo);
-			glNamedBufferData(vbo, vboCounts[idx] * sizeof(float), _alloca(vboCounts[idx] * sizeof(float)), m_VBOConfigs[idx].usage);
+			glNamedBufferData(vbo, vboCounts[idx] * sizeof(float), nullptr, m_VBOConfigs[idx].usage);
 
 			glVertexArrayVertexBuffer(m_VAO, m_VBOConfigs[idx].bindingIdx, vbo, 0, m_VBOConfigs[idx].stride);
 
@@ -59,18 +59,10 @@ namespace OGL
 
 	void VAO::reCreateVB(unsigned int vbCount, unsigned int bindingIdx)
 	{
-		glDeleteBuffers(1, &m_VBOs[bindingIdx]);
-		glCreateBuffers(1, &m_VBOs[bindingIdx]);
-
-		glNamedBufferData(m_VBOs[bindingIdx], sizeof(float) * vbCount, _alloca(sizeof(float) * vbCount), GL_DYNAMIC_DRAW);
-		glVertexArrayVertexBuffer(m_VAO, bindingIdx, m_VBOs[bindingIdx], 0, m_VBOConfigs[bindingIdx].stride);
+		glNamedBufferData(m_VBOs[bindingIdx], sizeof(float) * vbCount, nullptr, GL_DYNAMIC_DRAW);
 	}
 	void VAO::reCreateEB(unsigned int ebCount)
 	{
-		glDeleteBuffers(1, &m_EBO);
-		glCreateBuffers(1, &m_EBO);
-
-		glNamedBufferData(m_EBO, ebCount * sizeof(unsigned int), _alloca(ebCount * sizeof(unsigned int)), GL_DYNAMIC_DRAW);
-		glVertexArrayElementBuffer(m_VAO, m_EBO);
+		glNamedBufferData(m_EBO, ebCount * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
 	}
 }
