@@ -7,15 +7,23 @@
 
 namespace OGL
 {
-	struct VAOAttrib
+	struct AttribInfo
 	{
-		unsigned int attrib;
+		unsigned int attribIdx;
 		unsigned int count;
-		unsigned int type;
 		unsigned int offset;
+		AttribInfo(unsigned int attribIdx, unsigned int count, unsigned int offset)
+			: attribIdx(attribIdx), count(count), offset(offset) {}
+	};
+
+	struct VBOConfig
+	{
+		unsigned int bindingIdx;
+		unsigned int usage;
 		unsigned int stride;
-		VAOAttrib(unsigned int attrib, unsigned int count, unsigned int type, unsigned int offset, unsigned int stride)
-			: attrib(attrib), count(count), type(type), offset(offset), stride(stride) {}
+		std::vector<AttribInfo> attributes;
+		VBOConfig(unsigned int bindingIdx, unsigned int usage, unsigned int stride, std::vector<AttribInfo> attrbs)
+			: bindingIdx(bindingIdx), usage(usage), stride(stride), attributes(attrbs) {}
 	};
 
 	class VAO
@@ -23,26 +31,26 @@ namespace OGL
 		public:
 			VAO() = delete;
 			VAO(const VAO& other) = delete;
-			VAO(std::vector<float> vb, std::vector<unsigned int> eb, std::vector<VAOAttrib> attribList);
-			VAO(unsigned int vbCount, unsigned int ebCount, std::vector<VAOAttrib> attribList);
+			VAO(std::vector<VBOConfig> vboConfigs, std::vector<unsigned int> vboCounts, unsigned int eboCount);
 			~VAO();
 
 			void operator=(const VAO& other) = delete;
 
 		public:
 			void bind() const;
-			void updateVB(std::vector<float> vb, unsigned int offset);
+			void updateVB(std::vector<float> vb, unsigned int bindingIdx, unsigned int offset);
 			void updateEB(std::vector<unsigned int> eb, unsigned int offset);
 
-			void reCreateVB(unsigned int vbCount);
+			void reCreateVB(unsigned int vbCount, unsigned int bindingIdx);
 			void reCreateEB(unsigned int ebCount);
 
 		private:
-			void initialize(unsigned int vbCount, unsigned int ebCount);
+			void initialize(std::vector<unsigned int> vbCounts, unsigned int ebCount);
 
 		private:
-			unsigned int m_VAO, m_VBO, m_EBO;
-			std::vector<VAOAttrib> m_AttribList;
+			unsigned int m_VAO, m_EBO;
+			std::vector<VBOConfig> m_VBOConfigs;
+			std::vector<unsigned int> m_VBOs;
 	};
 }
 

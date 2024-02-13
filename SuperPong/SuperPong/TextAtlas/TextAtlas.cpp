@@ -53,7 +53,7 @@ namespace SPong
 	}
 
 	TextAtlas::TextAtlas(std::string atlasDetails, const SPong::GameData& game, AtlasDetailFormat format)
-		: m_VAO(16, 6, game.textureAttribList), m_Texture(atlasDetails.substr(0, atlasDetails.find_first_of('\n')), 4, game.textureFilters), m_Chars()
+		: m_VAO(game.textureVBOsConfigs, {8, 8}, 6), m_Texture(atlasDetails.substr(0, atlasDetails.find_first_of('\n')), 4, game.textureFilters), m_Chars()
 	{
 		int xInAtlas = 0;
 		for (unsigned int i = 0; i < 95; i++)
@@ -75,7 +75,8 @@ namespace SPong
 	void TextAtlas::reinitBuffers()
 	{
 		m_VAO.reCreateEB(m_CharacterCapacity * 6);
-		m_VAO.reCreateVB(m_CharacterCapacity * 16);
+		m_VAO.reCreateVB(m_CharacterCapacity * 8, 0);
+		m_VAO.reCreateVB(m_CharacterCapacity * 8, 1);
 
 		std::vector<unsigned int> eb;
 		eb.reserve(m_CharacterCapacity * 6);
@@ -107,8 +108,9 @@ namespace SPong
 		shader.use();
 		shader.uni1i("tex", 2);
 
-		std::vector<float> vb;
-		vb.reserve(sizeof(float) * text.length() * 16);
+		std::vector<float> posVB, texVB;
+		posVB.reserve(sizeof(float) * text.length() * 8);
+		texVB.reserve(sizeof(float) * text.length() * 8);
 
 		for (unsigned int i = 0; i < text.length(); i++)
 		{
@@ -122,20 +124,28 @@ namespace SPong
 			glm::vec2 mappedTL = (tl - crntMin) * slope + trgtMin;
 			glm::vec2 mappedBR = (br - crntMin) * slope + trgtMin;
 
-			std::vector<float> b{
-				mappedTL.x, mappedTL.y, info.uvBL.x, info.uvBL.y,
-				mappedBR.x, mappedTL.y, info.uvTR.x, info.uvBL.y,
-				mappedTL.x, mappedBR.y, info.uvBL.x, info.uvTR.y,
-				mappedBR.x, mappedBR.y, info.uvTR.x, info.uvTR.y
+			std::vector<float> p{
+				mappedTL.x, mappedTL.y,
+				mappedBR.x, mappedTL.y,
+				mappedTL.x, mappedBR.y,
+				mappedBR.x, mappedBR.y,
+			};
+			std::vector<float> t{
+				info.uvBL.x, info.uvBL.y,
+				info.uvTR.x, info.uvBL.y,
+				info.uvBL.x, info.uvTR.y,
+				info.uvTR.x, info.uvTR.y
 			};
 
-			vb.insert(vb.end(), b.begin(), b.end());
+			posVB.insert(posVB.end(), p.begin(), p.end());
+			texVB.insert(texVB.end(), t.begin(), t.end());
 
 			pos.x += info.advance.x * scale;
 			pos.y += info.advance.y * scale;
 		}
 
-		m_VAO.updateVB(vb, 0);
+		m_VAO.updateVB(posVB, 0, 0);
+		m_VAO.updateVB(texVB, 1, 0);
 		glDrawElements(GL_TRIANGLES, text.length() * 6, GL_UNSIGNED_INT, nullptr);
 	}
 	float TextAtlas::getTextWidth(const std::string& text, float scale)

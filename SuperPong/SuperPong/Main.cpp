@@ -115,11 +115,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 {
 	if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 	{
-		game.selectedMenuItem++;
+		game.selectedMenuItem--;
 	}
 	if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
 	{
-		game.selectedMenuItem--;
+		game.selectedMenuItem++;
 	}
 	if (game.selectedMenuItem < 0) game.selectedMenuItem = 1;
 	if (game.selectedMenuItem > 1) game.selectedMenuItem = 0;
@@ -230,12 +230,19 @@ int main()
 	logoTL = map(glm::vec2(0), game.windowDimension, glm::vec2(-1), glm::vec2(1), logoTL);
 	logoBR = map(glm::vec2(0), game.windowDimension, glm::vec2(-1), glm::vec2(1), logoBR);
 
-	std::vector<float> logoVB
+	std::vector<float> logoPosVB
 	{
-		logoTL.x, logoTL.y, 0.0F, 0.0F,
-		logoBR.x, logoTL.y, 1.0F, 0.0F,
-		logoTL.x, logoBR.y, 0.0F, 1.0F,
-		logoBR.x, logoBR.y, 1.0F, 1.0F,
+		logoTL.x, logoTL.y,
+		logoBR.x, logoTL.y,
+		logoTL.x, logoBR.y,
+		logoBR.x, logoBR.y,
+	};
+	std::vector<float> logoTexVB
+	{
+		0.0F, 0.0F,
+		1.0F, 0.0F,
+		0.0F, 1.0F,
+		1.0F, 1.0F,
 	};
 
 	std::vector<unsigned int> logoEB
@@ -244,7 +251,10 @@ int main()
 		1, 2, 3
 	};
 
-	OGL::VAO logoVAO(logoVB, logoEB, game.textureAttribList);
+	OGL::VAO logoVAO(game.logoVBOsConfigs, { 8, 8 }, 6);
+	logoVAO.updateEB(logoEB, 0);
+	logoVAO.updateVB(logoPosVB, 0, 0);
+	logoVAO.updateVB(logoTexVB, 1, 0);
 
 	int menuScale = 8;
 
@@ -260,17 +270,29 @@ int main()
 	glm::vec2 menu2TL = map(glm::vec2(0), game.windowDimension, glm::vec2(-1), glm::vec2(1), menu2TLPos);
 	glm::vec2 menu2BR = map(glm::vec2(0), game.windowDimension, glm::vec2(-1), glm::vec2(1), menu2BRPos);
 
-	std::vector<float> menuVB
+	std::vector<float> menuPosVB
 	{
-		menu1TL.x, menu1TL.y, 0.0F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 1.0F,
-		menu1BR.x, menu1TL.y, 0.5F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 1.0F,
-		menu1TL.x, menu1BR.y, 0.0F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 0.0F,
-		menu1BR.x, menu1BR.y, 0.5F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 0.0F,
+		menu1TL.x, menu1TL.y,
+		menu1BR.x, menu1TL.y,
+		menu1TL.x, menu1BR.y,
+		menu1BR.x, menu1BR.y,
 
-		menu2TL.x, menu2TL.y, 0.0F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 1.0F,
-		menu2BR.x, menu2TL.y, 0.5F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 1.0F,
-		menu2TL.x, menu2BR.y, 0.0F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 0.0F,
-		menu2BR.x, menu2BR.y, 0.5F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 0.0F,
+		menu2TL.x, menu2TL.y,
+		menu2BR.x, menu2TL.y,
+		menu2TL.x, menu2BR.y,
+		menu2BR.x, menu2BR.y,
+	};
+	std::vector<float> menuTexVB
+	{
+		0.0F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 1.0F,
+		0.5F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 1.0F,
+		0.0F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 0.0F,
+		0.5F + (game.selectedMenuItem == 0) ? 0.5F : 0.0F, 0.0F,
+
+		0.0F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 1.0F,
+		0.5F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 1.0F,
+		0.0F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 0.0F,
+		0.5F + (game.selectedMenuItem == 1) ? 0.5F : 0.0F, 0.0F,
 	};
 
 	std::vector<unsigned int> menuEB
@@ -279,7 +301,10 @@ int main()
 		4, 5, 6, 5, 6, 7,
 	};
 
-	OGL::VAO menuVAO(menuVB, menuEB, game.textureAttribList);
+	OGL::VAO menuVAO(game.menuVBOsConfigs, { 16, 16 }, 12);
+	menuVAO.updateVB(menuPosVB, 0, 0);
+	menuVAO.updateVB(menuTexVB, 1, 0);
+	menuVAO.updateEB(menuEB, 0);
 
 	constexpr glm::vec2 paddleDimension(20, -100);
 	glm::vec2 leftPaddlePos(game.windowDimension.x * 3 / 160, (game.windowDimension.y - paddleDimension.y) / 2);
@@ -294,7 +319,21 @@ int main()
 		5, 6, 7,
 	};
 
-	OGL::VAO paddleVAO(32, 12, game.textureAttribList);
+	std::vector<float> paddleTexVB
+	{
+		0, 0,
+		1, 0,
+		0, 1,
+		1, 1,
+
+		1, 0,
+		0, 0,
+		1, 1,
+		0, 1,
+	};
+
+	OGL::VAO paddleVAO(game.textureVBOsConfigs, { 16, 16 }, 12);
+	paddleVAO.updateVB(paddleTexVB, 1, 0);
 	paddleVAO.updateEB(paddleEB, 0);
 
 	float ballRadius = 10.0F;
@@ -311,7 +350,16 @@ int main()
 		0, 1, 2,  1, 2, 3
 	};
 
-	OGL::VAO ballVAO(16, 6, game.textureAttribList);
+	std::vector<float> ballTexVB
+	{
+		0, 1,
+		1, 1,
+		0, 0,
+		1, 0,
+	};
+
+	OGL::VAO ballVAO(game.textureVBOsConfigs, { 8, 8 }, 6);
+	ballVAO.updateVB(ballTexVB, 1, 0);
 	ballVAO.updateEB(ballEB, 0);
 
 	glm::vec4 separationLineColor(0.4F, 0.4F, 0.4F, 1.0F);
@@ -337,24 +385,26 @@ int main()
 		0, 1, 2, 1, 2, 3
 	};
 
-	OGL::VAO separationVAO(separationVB, separationEB, game.solidAttribList);
+	OGL::VAO separationVAO(game.solidVBOsConfigs, { 8 }, 6);
+	separationVAO.updateEB(separationEB, 0);
+	separationVAO.updateVB(separationVB, 0, 0);
 
 	auto renderMenuItems = [&]()
 		{
-			std::vector<float> vb
+			std::vector<float> texVB
 			{
-				menu1TL.x, menu1TL.y, 0.0F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 1.0F,
-				menu1BR.x, menu1TL.y, 0.5F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 1.0F,
-				menu1TL.x, menu1BR.y, 0.0F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 0.0F,
-				menu1BR.x, menu1BR.y, 0.5F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 0.0F,
+				0.0F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 1.0F,
+				0.5F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 1.0F,
+				0.0F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 0.0F,
+				0.5F + ((game.selectedMenuItem == 0) ? 0.5F : 0.0F), 0.0F,
 
-				menu2TL.x, menu2TL.y, 0.0F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 1.0F,
-				menu2BR.x, menu2TL.y, 0.5F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 1.0F,
-				menu2TL.x, menu2BR.y, 0.0F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 0.0F,
-				menu2BR.x, menu2BR.y, 0.5F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 0.0F,
+				0.0F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 1.0F,
+				0.5F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 1.0F,
+				0.0F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 0.0F,
+				0.5F + ((game.selectedMenuItem == 1) ? 0.5F : 0.0F), 0.0F,
 			};
 
-			menuVAO.updateVB(vb, 0);
+			menuVAO.updateVB(texVB, 1, 0);
 
 			game.textureShader.use();
 			menuVAO.bind();
@@ -378,20 +428,20 @@ int main()
 			leftBR = map(glm::vec2(0, 0), game.windowDimension, glm::vec2(-1, -1), glm::vec2(1, 1), leftBR);
 			rightTL = map(glm::vec2(0, 0), game.windowDimension, glm::vec2(-1, -1), glm::vec2(1, 1), rightTL);
 			rightBR = map(glm::vec2(0, 0), game.windowDimension, glm::vec2(-1, -1), glm::vec2(1, 1), rightBR);
-			std::vector<float> vb
+			std::vector<float> posVB
 			{
-				leftTL.x, leftTL.y, 0, 0,
-				leftBR.x, leftTL.y, 1, 0,
-				leftTL.x, leftBR.y, 0, 1,
-				leftBR.x, leftBR.y, 1, 1,
+				leftTL.x, leftTL.y,
+				leftBR.x, leftTL.y,
+				leftTL.x, leftBR.y,
+				leftBR.x, leftBR.y,
 
-				rightTL.x, rightTL.y, 1, 0,
-				rightBR.x, rightTL.y, 0, 0,
-				rightTL.x, rightBR.y, 1, 1,
-				rightBR.x, rightBR.y, 0, 1,
+				rightTL.x, rightTL.y,
+				rightBR.x, rightTL.y,
+				rightTL.x, rightBR.y,
+				rightBR.x, rightBR.y,
 			};
 
-			paddleVAO.updateVB(vb, 0);
+			paddleVAO.updateVB(posVB, 0, 0);
 		};
 	auto updateBallVbo = [&]()
 		{
@@ -399,14 +449,14 @@ int main()
 			glm::vec2 ballBR = ballPos + glm::vec2(ballRadius, -ballRadius);
 			ballTL = map(glm::vec2(0, 0), game.windowDimension, glm::vec2(-1, -1), glm::vec2(1, 1), ballTL);
 			ballBR = map(glm::vec2(0, 0), game.windowDimension, glm::vec2(-1, -1), glm::vec2(1, 1), ballBR);
-			std::vector<float> vb
+			std::vector<float> posVB
 			{
-				ballTL.x, ballTL.y, 0, 1,
-				ballBR.x, ballTL.y, 1, 1,
-				ballTL.x, ballBR.y, 0, 0,
-				ballBR.x, ballBR.y, 1, 0,
+				ballTL.x, ballTL.y,
+				ballBR.x, ballTL.y,
+				ballTL.x, ballBR.y,
+				ballBR.x, ballBR.y,
 			};
-			ballVAO.updateVB(vb, 0);
+			ballVAO.updateVB(posVB, 0, 0);
 		};
 	auto resetBall = [&]()
 		{

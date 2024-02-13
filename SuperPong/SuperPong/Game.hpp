@@ -23,14 +23,24 @@ namespace SPong
 		const glm::ivec2 windowDimension = glm::ivec2(1600, 900);
 		GS gameState = GS::MAIN_MENU;
 		OGL::TextureFilter textureFilters = OGL::TextureFilter(GL_NEAREST, GL_REPEAT);
-		std::vector<OGL::VAOAttrib> textureAttribList
+		std::vector<OGL::VBOConfig> logoVBOsConfigs
 		{
-			OGL::VAOAttrib(0, 2, GL_FLOAT, 0, sizeof(float) * 4),
-			OGL::VAOAttrib(1, 2, GL_FLOAT, sizeof(float) * 2, sizeof(float) * 4),
+			OGL::VBOConfig(0, GL_STATIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(0, 2, 0)}),
+			OGL::VBOConfig(1, GL_STATIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(1, 2, 0)}),
 		};
-		std::vector<OGL::VAOAttrib> solidAttribList
+		std::vector<OGL::VBOConfig> menuVBOsConfigs
 		{
-			OGL::VAOAttrib(0, 2, GL_FLOAT, 0, sizeof(float) * 2)
+			OGL::VBOConfig(0, GL_STATIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(0, 2, 0)}),
+			OGL::VBOConfig(1, GL_DYNAMIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(1, 2, 0)}),
+		};
+		std::vector<OGL::VBOConfig> textureVBOsConfigs
+		{
+			OGL::VBOConfig(0, GL_DYNAMIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(0, 2, 0)}),
+			OGL::VBOConfig(1, GL_STATIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(1, 2, 0)}),
+		};
+		std::vector<OGL::VBOConfig> solidVBOsConfigs
+		{
+			OGL::VBOConfig(0, GL_STATIC_DRAW, sizeof(float) * 2, {OGL::AttribInfo(0, 2, 0)})
 		};
 
 		OGL::Shader textureShader;
@@ -42,7 +52,7 @@ namespace SPong
 		bool leftHasWon = false;
 
 		// Data for MAIN MENU state;
-		unsigned int selectedMenuItem = 0;
+		int selectedMenuItem = 0;
 	};
 }
 
